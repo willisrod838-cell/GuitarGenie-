@@ -1,0 +1,36 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "description": "A fully-featured todo list app with local storage functionality",
+  "main": "index.js",
+  "scripts": {
+    "build:debug": "cordova build android",
+    "build:release": "cordova build android --release",
+    "clean": "cordova clean android",
+    "check": "cordova requirements android",
+    "serve": "cordova serve"
+  },
+  "keywords": [
+    "todo",
+    "task",
+    "list",
+    "storage",
+    "productivity",
+    "cordova",
+    "android"
+  ],
+  "author": "willisrod838-cell",
+  "license": "MIT",
+  "dependencies": {
+    "cordova-android": "^15.0.0"
+  },
+  "devDependencies": {
+    "cordova": "^15.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {}
+  }
+}
