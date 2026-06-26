@@ -1,0 +1,39 @@
+{
+  "name": "guitargenie",
+  "version": "1.0.0",
+  "description": "GuitarGenie - Audio recording app for guitarists. Never forget a riff again!",
+  "main": "index.js",
+  "scripts": {
+    "build:debug": "cordova build android",
+    "build:release": "cordova build android --release",
+    "clean": "cordova clean android",
+    "check": "cordova requirements android",
+    "serve": "cordova serve"
+  },
+  "keywords": [
+    "guitar",
+    "audio",
+    "recording",
+    "mobile",
+    "cordova",
+    "android"
+  ],
+  "author": "willisrod838-cell",
+  "license": "MIT",
+  "dependencies": {
+    "cordova-android": "^15.0.0"
+  },
+  "devDependencies": {
+    "cordova": "^15.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-media": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-device": {}
+    }
+  }
+}
