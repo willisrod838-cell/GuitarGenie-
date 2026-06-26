@@ -1,0 +1,361 @@
+GuitarGenie APK - Complete Build Guide
+Overview
+The GuitarGenie source code is ready to build into an Android APK. The sandbox environment doesn't have the Android SDK, but you can build it using one of these methods:
+Option 1: Build Locally (Recommended - 10 minutes)
+Prerequisites
+macOS
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Java
+brew install openjdk@11
+echo 'export PATH="/usr/local/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install Android SDK
+brew install android-sdk
+echo 'export ANDROID_HOME=/usr/local/share/android-sdk' >> ~/.zshrc
+echo 'export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH' >> ~/.zshrc
+source ~/.zshrc
+
+# Install Node.js
+brew install node
+
+# Install Cordova
+npm install -g cordova
+Windows (PowerShell as Administrator)
+# Install Chocolatey (if not installed)
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Install Java
+choco install openjdk11 -y
+
+# Install Android Studio (includes SDK)
+choco install androidstudio -y
+
+# Install Node.js
+choco install nodejs -y
+
+# Install Cordova
+npm install -g cordova
+
+# Set Environment Variables
+[Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\OpenJDK\jdk-11", [EnvironmentVariableTarget]::User)
+[Environment]::SetEnvironmentVariable("ANDROID_HOME", "C:\Users\$env:USERNAME\AppData\Local\Android\Sdk", [EnvironmentVariableTarget]::User)
+$env:Path += ";C:\Users\$env:USERNAME\AppData\Local\Android\Sdk\tools;C:\Users\$env:USERNAME\AppData\Local\Android\Sdk\platform-tools"
+Linux (Ubuntu/Debian)
+# Update package manager
+sudo apt-get update
+
+# Install Java
+sudo apt-get install -y openjdk-11-jdk
+
+# Install Android SDK
+sudo apt-get install -y android-sdk
+
+# Install Node.js
+sudo apt-get install -y nodejs npm
+
+# Install Cordova
+npm install -g cordova
+
+# Set environment variables
+echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64' >> ~/.bashrc
+echo 'export ANDROID_HOME=/usr/lib/android-sdk' >> ~/.bashrc
+echo 'export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH' >> ~/.bashrc
+source ~/.bashrc
+Build Steps
+# 1. Extract the source
+unzip guitargenie-apk-source.zip
+cd guitargenie-cordova
+
+# 2. Install dependencies
+npm install
+
+# 3. Build debug APK (for testing)
+cordova build android
+
+# OR build release APK (for distribution)
+cordova build android --release
+Find Your APK
+Debug APK:
+guitargenie-cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+Release APK (unsigned):
+guitargenie-cordova/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+Sign the Release APK
+# Create keystore (first time only - save this file!)
+keytool -genkey -v -keystore guitargenie.keystore -keyalg RSA -keysize 2048 -validity 10000 -alias guitargenie
+
+# Sign the APK
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore guitargenie.keystore platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk guitargenie
+
+# Optimize the APK
+zipalign -v 4 platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk GuitarGenie.apk
+
+# Your final APK is ready: GuitarGenie.apk
+Option 2: Build in the Cloud (Free - 15 minutes)
+Using GitHub Actions
+Create GitHub Repository
+git init
+git add .
+git commit -m "Initial commit: GuitarGenie APK"
+git remote add origin https://github.com/YOUR_USERNAME/guitargenie.git
+git push -u origin main
+Create Build Workflow
+Create .github/workflows/build-apk.yml:
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Cordova
+        run: npm install -g cordova
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build APK
+        run: cordova build android --release
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: guitargenie-apk
+          path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+Push to GitHub
+git push origin main
+Download APK
+Go to your GitHub repository
+Click "Actions" tab
+Find the latest build
+Download the APK artifact
+Using Codemagic (Recommended for Mobile)
+Go to codemagic.io
+Sign up with GitHub
+Connect your repository
+Create codemagic.yaml:
+workflows:
+  guitargenie-build:
+    name: GuitarGenie APK Build
+    instance_type: mac_mini_m1
+    environment:
+      java: 11
+      android_sdk: 36
+      node: 18
+    scripts:
+      - npm install -g cordova
+      - npm install
+      - cordova build android --release
+    artifacts:
+      - platforms/android/app/build/outputs/apk/release/**/*.apk
+Push to GitHub - build starts automatically
+Download APK from Codemagic dashboard
+Option 3: Use Online Build Services
+EAS Build (for React Native)
+Not recommended for Cordova
+Firebase App Distribution
+Go to Firebase Console
+Create new project
+Add Android app
+Follow setup instructions
+Upload APK for testing
+Installation on Android Device
+Method 1: USB Transfer (Easiest)
+# Connect phone via USB
+# Enable Developer Mode: Settings > About Phone > tap Build Number 7 times
+# Enable USB Debugging: Settings > Developer Options > USB Debugging
+
+# Copy APK to phone
+adb push GuitarGenie.apk /sdcard/Download/
+
+# Or manually:
+# 1. Connect phone
+# 2. Open file manager
+# 3. Copy APK to Downloads folder
+# 4. Open file manager on phone
+# 5. Navigate to Downloads
+# 6. Tap GuitarGenie.apk
+# 7. Tap Install
+# 8. Grant permissions
+Method 2: ADB Install
+adb install GuitarGenie.apk
+Method 3: Email/Cloud
+Upload APK to Google Drive, Dropbox, or OneDrive
+Share link
+Download on phone
+Tap to install
+Enable "Unknown Sources" if prompted
+Method 4: QR Code
+# Generate QR code linking to APK
+# Use any QR code generator with the download link
+# Scan with phone to download and install
+Troubleshooting
+Build Errors
+Error
+Solution
+ANDROID_HOME not found
+Set environment variable: export ANDROID_HOME=/path/to/sdk
+Gradle build failed
+Run cordova clean android then rebuild
+Java version mismatch
+Ensure Java 11+: java -version
+SDK not found
+Install Android SDK via Android Studio
+Permission denied
+On Linux: sudo usermod -a -G android $USER
+Installation Errors
+Error
+Solution
+Unknown app
+Enable "Unknown Sources": Settings > Security
+Installation failed
+Clear app cache, restart phone
+Permission denied
+Grant microphone permission in app settings
+App crashes
+Check device has Android 7.0+
+Runtime Errors
+Error
+Solution
+Microphone not working
+Grant microphone permission in Settings
+No audio recorded
+Check microphone is not muted
+App freezes
+Restart app, clear cache
+Storage full
+Delete old recordings, free up space
+Project Structure
+guitargenie-cordova/
+├── www/
+│   └── index.html              # Full GuitarGenie app
+├── config.xml                  # App configuration & permissions
+├── package.json                # Dependencies
+├── plugins/
+│   ├── cordova-plugin-media    # Audio recording
+│   └── cordova-plugin-file     # File access
+├── platforms/
+│   └── android/                # Android project (after build)
+│       ├── app/
+│       │   └── build/
+│       │       └── outputs/
+│       │           └── apk/
+│       │               ├── debug/
+│       │               │   └── app-debug.apk
+│       │               └── release/
+│       │                   └── app-release-unsigned.apk
+│       └── gradle.properties
+└── BUILD_APK_INSTRUCTIONS.md
+Signing for Distribution
+Create Keystore (One-time)
+keytool -genkey -v -keystore guitargenie.keystore \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias guitargenie
+Save this file securely! You'll need it for future updates.
+Sign APK
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
+  -keystore guitargenie.keystore \
+  platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk \
+  guitargenie
+Optimize APK
+zipalign -v 4 \
+  platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk \
+  GuitarGenie.apk
+Publishing
+Google Play Store
+Create Google Play Developer account ($25 one-time)
+Create app listing
+Upload signed APK
+Add screenshots, description, privacy policy
+Set pricing and distribution
+Submit for review (24-48 hours)
+Alternative Distribution
+GitHub Releases - Free hosting
+APKMirror - Third-party repository
+F-Droid - Open-source apps
+Direct distribution - Share APK link
+Features Included
+✅ Real Audio Recording
+Web Audio API with microphone access
+48kHz sample rate
+24-bit depth
+MP3/WebM format
+✅ Waveform Visualization
+Real-time frequency display
+Animated bars during recording
+Visual feedback
+✅ Recording Management
+Save with metadata
+Duration tracking
+Local storage
+Persistent library
+✅ Playback & Editing
+Audio player with progress bar
+Play/pause controls
+Download recordings
+Delete unwanted files
+✅ User Interface
+Modern dark theme
+Neon accents (cyan, purple, pink)
+Responsive design
+Smooth animations
+✅ Permissions Configured
+RECORD_AUDIO
+MODIFY_AUDIO_SETTINGS
+WRITE_EXTERNAL_STORAGE
+READ_EXTERNAL_STORAGE
+INTERNET
+ACCESS_NETWORK_STATE
+Support & Resources
+Cordova Documentation
+Android Developer Guide
+Web Audio API
+GitHub Actions
+Codemagic Docs
+Version Information
+Cordova: 15.0.0
+Android Target SDK: 36
+Minimum SDK: 24 (Android 7.0)
+Node.js: 14.0+
+Java: JDK 11+
+Quick Reference
+# Extract
+unzip guitargenie-apk-source.zip && cd guitargenie-cordova
+
+# Install
+npm install
+
+# Build Debug
+cordova build android
+
+# Build Release
+cordova build android --release
+
+# Clean
+cordova clean android
+
+# Check
+cordova requirements android
+GuitarGenie v1.0.0 | Never forget a riff again! 🎸
