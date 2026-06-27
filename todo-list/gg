@@ -1,2 +1,5 @@
 npx expo install expo-av expo-file-system
 npx expo install expo-haptics
+npx expo install expo-av expo-file-system
+npx expo install expo-haptics
+npx expo start
